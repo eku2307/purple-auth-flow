@@ -1,0 +1,196 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Sparkles, LogOut, CheckCircle2, Calendar, Target } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
+
+const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user is logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUser(session.user);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out.",
+      });
+      setUser(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignIn = () => {
+    navigate("/auth");
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-primary" />
+            <span className="text-xl font-bold text-foreground">ProductivityHub</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            {user ? (
+              <Button onClick={handleSignOut} variant="outline" className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button onClick={handleSignIn} className="gap-2">
+                Sign In
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-12">
+        {user ? (
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl font-bold text-foreground">
+                Welcome back, {user.email?.split("@")[0]}!
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Your personal productivity dashboard
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Tasks</h3>
+                <p className="text-muted-foreground">
+                  Manage your daily tasks and stay organized
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Tasks
+                </Button>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Calendar</h3>
+                <p className="text-muted-foreground">
+                  Keep track of your schedule and events
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Calendar
+                </Button>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Target className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">Goals</h3>
+                <p className="text-muted-foreground">
+                  Set and achieve your personal goals
+                </p>
+                <Button variant="outline" className="w-full">
+                  View Goals
+                </Button>
+              </Card>
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-4">
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-auth-gradient flex items-center justify-center">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <h1 className="text-5xl font-bold text-foreground">
+                Your Personal Productivity Hub
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Access your tasks, notes, and projects anytime, anywhere. Keep everything flowing in one place with clarity and focus.
+              </p>
+            </div>
+
+            <div className="flex justify-center gap-4 mt-8">
+              <Button onClick={handleSignIn} size="lg" className="text-lg px-8">
+                Get Started
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Task Management</h3>
+                <p className="text-muted-foreground">
+                  Organize and prioritize your daily tasks efficiently
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Calendar className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Smart Scheduling</h3>
+                <p className="text-muted-foreground">
+                  Never miss important events with intelligent reminders
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
+                  <Target className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Goal Tracking</h3>
+                <p className="text-muted-foreground">
+                  Set, track, and achieve your personal and professional goals
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;

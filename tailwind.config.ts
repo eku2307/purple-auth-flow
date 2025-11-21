@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -57,6 +58,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gradient: {
+          start: "hsl(var(--gradient-start))",
+          middle: "hsl(var(--gradient-middle))",
+          end: "hsl(var(--gradient-end))",
+        },
+      },
+      backgroundImage: {
+        'auth-gradient': 'linear-gradient(135deg, hsl(var(--auth-gradient-start)), hsl(var(--auth-gradient-end)))',
+        'purple-gradient': 'linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-middle)), hsl(var(--gradient-end)))',
       },
       borderRadius: {
         lg: "var(--radius)",
