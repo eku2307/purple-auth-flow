@@ -142,7 +142,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <h1 className="text-5xl font-bold text-foreground">
-                Your Personal Productivity Hub
+                Your Smart Payment Management Hub
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                 Track transactions, manage accounts, and monitor financial insights — all in one secure and intuitive dashboard.
