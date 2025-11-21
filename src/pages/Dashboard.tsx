@@ -88,7 +88,7 @@ const Dashboard = () => {
                 Welcome back, {user.email?.split("@")[0]}!
               </h1>
               <p className="text-xl text-muted-foreground">
-                Your personal productivity dashboard
+                Your Smart Payment Management Hub
               </p>
             </div>
 
@@ -145,7 +145,7 @@ const Dashboard = () => {
                 Your Personal Productivity Hub
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Access your tasks, notes, and projects anytime, anywhere. Keep everything flowing in one place with clarity and focus.
+                Track transactions, manage accounts, and monitor financial insights — all in one secure and intuitive dashboard.
               </p>
             </div>
 
@@ -160,9 +160,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Task Management</h3>
+                <h3 className="text-lg font-semibold text-foreground">Real-Time Transactions</h3>
                 <p className="text-muted-foreground">
-                  Organize and prioritize your daily tasks efficiently
+                  View and track every incoming and outgoing payment instantly with clear, structured logs.
                 </p>
               </div>
 
@@ -170,9 +170,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <Calendar className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Smart Scheduling</h3>
+                <h3 className="text-lg font-semibold text-foreground">Smart Billing & Invoices</h3>
                 <p className="text-muted-foreground">
-                  Never miss important events with intelligent reminders
+                  Generate, manage, and automate invoices with seamless scheduling and reminders.
                 </p>
               </div>
 
@@ -180,9 +180,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Goal Tracking</h3>
+                <h3 className="text-lg font-semibold text-foreground">Analytics & Insights</h3>
                 <p className="text-muted-foreground">
-                  Set, track, and achieve your personal and professional goals
+                  Visualize financial health with charts, summaries, and AI-powered spending analysis.
                 </p>
               </div>
             </div>
