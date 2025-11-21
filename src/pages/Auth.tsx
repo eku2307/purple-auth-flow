@@ -109,9 +109,9 @@ const Auth = () => {
         <div className="relative z-10 max-w-md space-y-6 text-white">
           <Sparkles className="w-12 h-12 mb-4" />
           <div>
-            <p className="text-lg opacity-90 mb-4">You can easily</p>
+            <p className="text-lg opacity-90 mb-4">Manage everything effortlessly</p>
             <h1 className="text-5xl font-bold leading-tight">
-              Get access your personal hub for clarity and productivity
+              Get secure access to your payment dashboard with ease
             </h1>
           </div>
         </div>
@@ -128,7 +128,7 @@ const Auth = () => {
               {isLogin ? "Welcome back" : "Create an account"}
             </h2>
             <p className="text-muted-foreground">
-              Access your tasks, notes, and projects anytime, anywhere - and keep everything flowing in one place.
+              Access your payments, transactions, and financial insights anytime — all from one secure dashboard.
             </p>
           </div>
 
