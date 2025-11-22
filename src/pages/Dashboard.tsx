@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Sparkles, LogOut, CheckCircle2, Calendar, Target } from "lucide-react";
+import { Sparkles, LogOut, CreditCard, Receipt, TrendingUp } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
@@ -95,40 +95,40 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-primary" />
+                  <CreditCard className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Tasks</h3>
+                <h3 className="text-xl font-semibold text-foreground">Payments</h3>
                 <p className="text-muted-foreground">
-                  Manage your daily tasks and stay organized
+                  Process and manage all your payment transactions
                 </p>
                 <Button variant="outline" className="w-full">
-                  View Tasks
+                  View Payments
                 </Button>
               </Card>
 
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-primary" />
+                  <Receipt className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Calendar</h3>
+                <h3 className="text-xl font-semibold text-foreground">Invoices</h3>
                 <p className="text-muted-foreground">
-                  Keep track of your schedule and events
+                  Create and track invoices for your clients
                 </p>
                 <Button variant="outline" className="w-full">
-                  View Calendar
+                  View Invoices
                 </Button>
               </Card>
 
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Target className="w-6 h-6 text-primary" />
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Goals</h3>
+                <h3 className="text-xl font-semibold text-foreground">Analytics</h3>
                 <p className="text-muted-foreground">
-                  Set and achieve your personal goals
+                  Monitor financial trends and insights
                 </p>
                 <Button variant="outline" className="w-full">
-                  View Goals
+                  View Analytics
                 </Button>
               </Card>
             </div>
@@ -158,7 +158,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
               <div className="space-y-3">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-6 h-6 text-primary" />
+                  <CreditCard className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Real-Time Transactions</h3>
                 <p className="text-muted-foreground">
@@ -168,7 +168,7 @@ const Dashboard = () => {
 
               <div className="space-y-3">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Calendar className="w-6 h-6 text-primary" />
+                  <Receipt className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Smart Billing & Invoices</h3>
                 <p className="text-muted-foreground">
@@ -178,7 +178,7 @@ const Dashboard = () => {
 
               <div className="space-y-3">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Target className="w-6 h-6 text-primary" />
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Analytics & Insights</h3>
                 <p className="text-muted-foreground">
