@@ -10,12 +10,12 @@ export default function Dashboard() {
           Payment Dashboard
         </h1>
 
-        <p className="text-gray-600 max-w-2xl">
+        <p className="text-gray-600 max-w-2xl mb-8">
           Track payments, review transaction history, and manage your cards all
           in one user-friendly space.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Card – Manage Cards */}
           <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
