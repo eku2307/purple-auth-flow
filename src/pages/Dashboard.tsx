@@ -1,191 +1,76 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import LoginPage from "../pages/LoginPage";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Sparkles, LogOut, CreditCard, Receipt, TrendingUp } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
-const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  useEffect(() => {
-    // Check if user is logged in
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
-      if (session) {
-        setUser(session.user);
-      }
-    });
+import { CreditCard, BarChart3, Wallet } from "lucide-react";
 
-    // Listen for auth changes
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-  const handleSignOut = async () => {
-    try {
-      const {
-        error
-      } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out."
-      });
-      setUser(null);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign out",
-        variant: "destructive"
-      });
-    }
-  };
-  const handleSignIn = () => {
-    navigate("/auth");
-  };
-  return <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold text-foreground">ProductivityHub</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            {user ? <Button onClick={handleSignOut} variant="outline" className="gap-2">
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button> : <Button onClick={handleSignIn} className="gap-2">
-                Sign In
-              </Button>}
-          </div>
+export default function Dashboard() {
+  const [showLogin, setShowLogin] = useState(false);
+
+  if (showLogin) {
+    return <LoginPage />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-6xl">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          Payment Dashboard
+        </h1>
+
+        <p className="text-gray-600 max-w-2xl">
+          Track payments, review transaction history, and manage your cards all
+          in one user-friendly space.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+
+          {/* Card – Manage Cards */}
+          <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-primary" />
+            </div>
+
+            <h3 className="text-xl font-semibold text-foreground">
+              Manage Cards
+            </h3>
+
+            <p className="text-muted-foreground">
+              Add, track, and manage all your payment cards securely.
+            </p>
+          </Card>
+
+          {/* Card – Transactions */}
+          <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Wallet className="w-6 h-6 text-primary" />
+            </div>
+
+            <h3 className="text-xl font-semibold text-foreground">
+              Transactions
+            </h3>
+
+            <p className="text-muted-foreground">
+              View detailed transaction history and track your expenses.
+            </p>
+          </Card>
+
+          {/* Card – Analytics */}
+          <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="w-6 h-6 text-primary" />
+            </div>
+
+            <h3 className="text-xl font-semibold text-foreground">
+              Analytics
+            </h3>
+
+            <p className="text-muted-foreground">
+              Get insights into your spending patterns and budget.
+            </p>
+          </Card>
         </div>
-      </header>
+      </div>
+    </div>
+  );
+}
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        {user ? <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <h1 className="text-4xl font-bold text-foreground">
-                Welcome back, {user.email?.split("@")[0]}!
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Your Smart Payment Management Hub
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">Payments</h3>
-                <p className="text-muted-foreground">
-                  Process and manage all your payment transactions
-                </p>
-                <Button variant="outline" className="w-full">
-                  View Analytics
-                </Button>
-              </Card>
-
-              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
-  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-    <CreditCard className="w-6 h-6 text-primary" />
-  </div>
-
-  <h3 className="text-xl font-semibold text-foreground">
-    Manage Cards
-  </h3>
-
-  <p className="text-muted-foreground">
-    Add, track, and manage all your payment cards in one secure place.
-  </p>
-</</Card>
-
-
-              
-              <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">Analytics</h3>
-                <p className="text-muted-foreground">
-                  Monitor financial trends and insights
-                </p>
-                <Button variant="outline" className="w-full">
-                  View Analytics
-                </Button>
-              </Card>
-            </div>
-          </div> : <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div className="space-y-4">
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 rounded-full bg-auth-gradient flex items-center justify-center">
-                  <Sparkles className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <h1 className="text-5xl font-bold text-foreground">
-                Your Smart Payment Management Hub
-              </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Track transactions, manage accounts, and monitor financial insights — all in one secure and intuitive dashboard.
-              </p>
-            </div>
-
-            <div className="flex justify-center gap-4 mt-8">
-              <Button onClick={handleSignIn} size="lg" className="text-lg px-8">
-                Get Started
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <CreditCard className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">Real-Time Transactions</h3>
-                <p className="text-muted-foreground">
-                  View and track every incoming and outgoing payment instantly with clear, structured logs.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <Receipt className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">Smart Billing & Invoices</h3>
-                <p className="text-muted-foreground">
-                  Generate, manage, and automate invoices with seamless scheduling and reminders.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">Analytics & Insights</h3>
-                <p className="text-muted-foreground">
-                  Visualize financial health with charts, summaries, and AI-powered spending analysis.
-                </p>
-              </div>
-            </div>
-          </div>}
-      </main>
-    </div>;
-};
-export default Dashboard;
