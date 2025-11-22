@@ -104,17 +104,19 @@ const Dashboard = () => {
               </Card>
 
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Receipt className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">Invoices</h3>
-                <p className="text-muted-foreground">
-                  Create and track invoices for your clients
-                </p>
-                <Button variant="outline" className="w-full">
-                  View Invoices
-                </Button>
-              </Card>
+  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+    <CreditCard className="w-6 h-6 text-primary" />
+  </div>
+
+  <h3 className="text-xl font-semibold text-foreground">
+    Manage Cards
+  </h3>
+
+  <p className="text-muted-foreground">
+    Add, track, and manage all your payment cards in one secure place.
+  </p>
+</Card>
+
 
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
