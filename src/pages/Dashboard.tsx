@@ -61,7 +61,7 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold text-foreground">ProductivityHub</span>
+            <span className="text-xl font-bold text-foreground">NovaPay</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
