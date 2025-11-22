@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import LoginPage from "../pages/LoginPage";
+import React from "react";
 import { Card } from "@/components/ui/card";
 import { CreditCard, BarChart3, Wallet } from "lucide-react";
 
 export default function Dashboard() {
-  const [showLogin, setShowLogin] = useState(false);
-
-  if (showLogin) {
-    return <LoginPage />;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-6">
       <div className="w-full max-w-6xl">
@@ -22,7 +15,7 @@ export default function Dashboard() {
           in one user-friendly space.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 
           {/* Card – Manage Cards */}
           <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
