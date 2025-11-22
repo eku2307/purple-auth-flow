@@ -7,15 +7,19 @@ import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sparkles, LogOut, CreditCard, Receipt, TrendingUp } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
-
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     // Check if user is logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       if (session) {
         setUser(session.user);
       }
@@ -23,66 +27,59 @@ const Dashboard = () => {
 
     // Listen for auth changes
     const {
-      data: { subscription },
+      data: {
+        subscription
+      }
     } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
-
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const {
+        error
+      } = await supabase.auth.signOut();
       if (error) throw error;
-
       toast({
         title: "Signed out",
-        description: "You've been successfully signed out.",
+        description: "You've been successfully signed out."
       });
       setUser(null);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to sign out",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleSignIn = () => {
     navigate("/auth");
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold text-foreground">NovaPay</span>
+            <span className="text-xl font-bold text-foreground">ProductivityHub</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            {user ? (
-              <Button onClick={handleSignOut} variant="outline" className="gap-2">
+            {user ? <Button onClick={handleSignOut} variant="outline" className="gap-2">
                 <LogOut className="w-4 h-4" />
                 Sign Out
-              </Button>
-            ) : (
-              <Button onClick={handleSignIn} className="gap-2">
+              </Button> : <Button onClick={handleSignIn} className="gap-2">
                 Sign In
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
-        {user ? (
-          <div className="space-y-8">
+        {user ? <div className="space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold text-foreground">
                 Welcome back, {user.email?.split("@")[0]}!
@@ -97,9 +94,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Payments</h3>
+                <h3 className="text-xl font-semibold text-foreground">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            Payments</h3>
                 <p className="text-muted-foreground">
-                  Process and manage all your payment transactions
+                  Process and manage all your payment                                 transactions
                 </p>
                 <Button variant="outline" className="w-full">
                   View Payments
@@ -132,9 +129,7 @@ const Dashboard = () => {
                 </Button>
               </Card>
             </div>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto text-center space-y-8">
+          </div> : <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-4">
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-auth-gradient flex items-center justify-center">
@@ -186,11 +181,8 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-          </div>
-        )}
+          </div>}
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
