@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { authService } from "@/lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sparkles, Mail, Lock, User } from "lucide-react";
 
@@ -159,12 +160,7 @@ const Auth = () => {
           <Button
             variant="outline"
             className="w-full border-2"
-            onClick={() => {
-              toast({
-                title: "Google Sign In",
-                description: "Google OAuth needs to be configured in the backend at /api/auth/google",
-              });
-            }}
+            onClick={() => authService.initiateGoogleLogin()}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path

@@ -47,6 +47,17 @@ export const authService = {
     return apiClient.post('/auth/register', userData);
   },
 
+  async initiateGoogleLogin(): Promise<void> {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+    // Redirect directly to the OAuth endpoint
+    window.location.href = `${API_BASE_URL}/auth/google`;
+  },
+
+  handleOAuthCallback(token: string, userInfo: AuthResponse): void {
+    localStorage.setItem('jwt_token', token);
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
+  },
+
   async getProfile(): Promise<UserProfile> {
     return apiClient.get<UserProfile>('/users/me');
   },
