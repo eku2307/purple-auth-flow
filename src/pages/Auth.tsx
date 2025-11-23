@@ -1,202 +1,170 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Sparkles, Mail, Lock, User } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, register } = useAuth();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
+        await login(email, password);
         toast({
           title: "Welcome back!",
-          description: "You've successfully logged in.",
+          description: "You've successfully signed in.",
         });
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (error) throw error;
-
+        await register(username, email, password);
         toast({
           title: "Account created!",
-          description: "You've successfully signed up. You can now log in.",
+          description: "You've successfully signed up.",
         });
-        setIsLogin(true);
       }
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "An error occurred during authentication",
+        description: error.message || "Authentication failed",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign in with Google",
-        variant: "destructive",
-      });
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Gradient with Text */}
-      <div className="hidden lg:flex lg:w-1/2 bg-auth-gradient items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary-glow/10" />
-        <div className="relative z-10 max-w-md space-y-6 text-white">
-          <Sparkles className="w-12 h-12 mb-4" />
-          <div>
-            <p className="text-lg opacity-90 mb-4">Manage everything effortlessly</p>
-            <h1 className="text-5xl font-bold leading-tight">
-              Get secure access to your payment dashboard with ease
-            </h1>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Right Side - Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
+      {/* Auth Card */}
+      <Card className="w-full max-w-md p-8 backdrop-blur-sm bg-card/95 border-2 relative z-10">
+        <div className="space-y-6">
+          {/* Logo and Header */}
           <div className="text-center space-y-2">
             <div className="flex justify-center mb-4">
-              <Sparkles className="w-10 h-10 text-primary" />
+              <div className="w-16 h-16 rounded-full bg-auth-gradient flex items-center justify-center">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
             </div>
-            <h2 className="text-3xl font-bold text-foreground">
-              {isLogin ? "Welcome back" : "Create an account"}
-            </h2>
+            <h1 className="text-3xl font-bold text-foreground">NovaPay</h1>
             <p className="text-muted-foreground">
-              Access your payments, transactions, and financial insights anytime — all from one secure dashboard.
+              {isLogin ? "Welcome back! Sign in to continue" : "Create your account to get started"}
             </p>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-foreground">
+                  Full Name
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="John Doe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required={!isLogin}
+                    className="pl-10 bg-background border-border"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="email">Your email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-12"
-              />
+              <Label htmlFor="email" className="text-foreground">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pl-10 bg-background border-border"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-foreground">
+                Password
+              </Label>
               <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••••"
+                  type="password"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-12 pr-10"
+                  minLength={6}
+                  className="pl-10 bg-background border-border"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 text-base font-medium"
-              disabled={loading}
+              className="w-full bg-auth-gradient hover:opacity-90 transition-opacity"
+              disabled={isLoading}
             >
-              {loading ? "Loading..." : isLogin ? "Sign In" : "Get Started"}
+              {isLoading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>
 
+          {/* Google Sign In - Note: Requires backend Google OAuth setup */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <Separator />
+              <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                or continue with
-              </span>
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
           <Button
-            type="button"
             variant="outline"
-            className="w-full h-12"
-            onClick={handleGoogleSignIn}
+            className="w-full border-2"
+            onClick={() => {
+              toast({
+                title: "Google Sign In",
+                description: "Google OAuth needs to be configured in the backend at /api/auth/google",
+              });
+            }}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -216,30 +184,24 @@ const Auth = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            Sign in with Google
           </Button>
 
-          <div className="text-center">
+          {/* Toggle between login and signup */}
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            </span>{" "}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-primary"
+              className="text-primary hover:underline font-medium"
             >
-              {isLogin ? (
-                <>
-                  Don't have an account?{" "}
-                  <span className="font-semibold text-primary">Sign up</span>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <span className="font-semibold text-primary">Sign in</span>
-                </>
-              )}
+              {isLogin ? "Sign Up" : "Sign In"}
             </button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
