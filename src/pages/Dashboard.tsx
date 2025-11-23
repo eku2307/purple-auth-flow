@@ -1,53 +1,22 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sparkles, LogOut, CreditCard, Receipt, TrendingUp } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
 
 const Dashboard = () => {
-  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAuthenticated, logout } = useAuth();
 
-  useEffect(() => {
-    // Check if user is logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setUser(session.user);
-      }
+  const handleSignOut = () => {
+    logout();
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out.",
     });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out.",
-      });
-      setUser(null);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign out",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleSignIn = () => {
@@ -65,7 +34,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            {user ? (
+            {isAuthenticated ? (
               <Button onClick={handleSignOut} variant="outline" className="gap-2">
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -81,11 +50,11 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
-        {user ? (
+        {isAuthenticated ? (
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold text-foreground">
-                Welcome back, {user.email?.split("@")[0]}!
+                Welcome back, {user?.username || user?.email?.split("@")[0]}!
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your Smart Payment Management Hub
