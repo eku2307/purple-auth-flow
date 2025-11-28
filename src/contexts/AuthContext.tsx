@@ -6,7 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, upiId: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -17,11 +17,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
     const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
+    if (currentUser) setUser(currentUser);
     setIsLoading(false);
   }, []);
 
@@ -30,9 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(response);
   };
 
-  const register = async (username: string, email: string, password: string) => {
-    await authService.register({ username, email, password });
-    // After registration, automatically log in
+  const register = async (name: string, email: string, upiId: string, password: string) => {
+    await authService.register({ name, email, upiId, password });
     await login(email, password);
   };
 
@@ -59,8 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

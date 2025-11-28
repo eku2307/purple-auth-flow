@@ -6,9 +6,10 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  username: string;
+  name: string;
   email: string;
   password: string;
+  upiId: string;
 }
 
 export interface AuthResponse {
@@ -44,15 +45,21 @@ export const authService = {
   },
 
   async register(userData: RegisterRequest): Promise<any> {
-    return apiClient.post('/auth/register', userData);
+    return apiClient.post('/auth/register', {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      upiId: userData.upiId
+    });
   },
 
+  /** GOOGLE LOGIN (SPRING BOOT) */
   async initiateGoogleLogin(): Promise<void> {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-    // Redirect directly to the OAuth endpoint
-    window.location.href = `${API_BASE_URL}/auth/google`;
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
   },
 
+  /** Store token from OAuthSuccess */
   handleOAuthCallback(token: string, userInfo: AuthResponse): void {
     localStorage.setItem('jwt_token', token);
     localStorage.setItem('user_info', JSON.stringify(userInfo));
