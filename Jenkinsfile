@@ -3,10 +3,23 @@ pipeline {
 
     environment {
         DEPLOY_DIR = '/var/www/html'
-        BUILD_DIR = 'dist' // Vite outputs to 'dist' by default
+        BUILD_DIR = 'dist'
     }
 
     stages {
+
+        stage('Prepare Environment') {
+            steps {
+                sh '''
+                    echo "Updating system packages..."
+                    sudo apt-get update -y
+
+                    echo "Installing Node, npm & build tools if missing..."
+                    which node || sudo apt-get install -y nodejs npm
+                '''
+            }
+        }
+
         stage('Pull Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/eku2307/purple-auth-flow.git'
@@ -15,24 +28,38 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci' // cleaner than npm install for CI
+                sh '''
+                    echo "Installing dependencies using npm ci..."
+                    npm ci || npm install
+                '''
             }
         }
 
-        stage('Build') {
+        stage('Build Project') {
             steps {
-                sh 'npm run build'
+                sh '''
+                    echo "Building project..."
+                    npm run build
+                '''
             }
         }
 
-        stage('Deploy to Nginx') {
+        stage('Deploy to Server') {
             steps {
                 script {
-                    if (!fileExists(BUILD_DIR)) {
-                        error "Build directory '${BUILD_DIR}' not found!"
+                    if (!fileExists(env.BUILD_DIR)) {
+                        error "❌ Build directory '${env.BUILD_DIR}' not found!"
                     }
-                    sh "rm -rf ${DEPLOY_DIR}/*"
-                    sh "cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/"
+                    sh '''
+                        echo "Cleaning existing deployment..."
+                        sudo rm -rf ${DEPLOY_DIR}/*
+
+                        echo "Copying new build files..."
+                        sudo cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/
+
+                        echo "Restarting web server..."
+                        sudo systemctl restart nginx || sudo systemctl restart apache2
+                    '''
                 }
             }
         }
@@ -40,10 +67,13 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo '✅ Deployment completed successfully!'
         }
         failure {
-            echo 'Deployment failed.'
+            echo '❌ Deployment failed. Check logs.'
         }
+    }
+}
+
     }
 }
