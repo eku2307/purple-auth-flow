@@ -1,5 +1,5 @@
 // UPI Backend API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://16.112.4.208:8080/api';
 
 // API Client with JWT authentication
 class ApiClient {
