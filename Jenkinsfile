@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DEPLOY_DIR = '/var/www/html'
+        BUILD_DIR = 'dist' // Vite outputs to 'dist' by default
+    }
+
     stages {
         stage('Pull Code') {
             steps {
@@ -10,7 +15,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                sh 'npm ci' // cleaner than npm install for CI
             }
         }
 
@@ -22,9 +27,23 @@ pipeline {
 
         stage('Deploy to Nginx') {
             steps {
-                sh 'sudo rm -rf /var/www/html/*'
-                sh 'sudo cp -r build/* /var/www/html/'
+                script {
+                    if (!fileExists(BUILD_DIR)) {
+                        error "Build directory '${BUILD_DIR}' not found!"
+                    }
+                    sh "rm -rf ${DEPLOY_DIR}/*"
+                    sh "cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/"
+                }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment completed successfully!'
+        }
+        failure {
+            echo 'Deployment failed.'
         }
     }
 }
