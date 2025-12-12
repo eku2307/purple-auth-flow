@@ -29,7 +29,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    echo "Installing dependencies using npm ci..."
+                    echo "Installing dependencies..."
                     npm ci || npm install
                 '''
             }
@@ -46,34 +46,26 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                script {
-                    if (!fileExists(env.BUILD_DIR)) {
-                        error "❌ Build directory '${env.BUILD_DIR}' not found!"
-                    }
-                    sh '''
-                        echo "Cleaning existing deployment..."
-                        sudo rm -rf ${DEPLOY_DIR}/*
+                sh '''
+                    echo "Cleaning existing deployment..."
+                    sudo rm -rf ${DEPLOY_DIR}/*
 
-                        echo "Copying new build files..."
-                        sudo cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/
+                    echo "Copying new build files..."
+                    sudo cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/
 
-                        echo "Restarting web server..."
-                        sudo systemctl restart nginx || sudo systemctl restart apache2
-                    '''
-                }
+                    echo "Restarting web server..."
+                    sudo systemctl restart nginx || sudo systemctl restart apache2
+                '''
             }
         }
     }
 
     post {
         success {
-            echo '✅ Deployment completed successfully!'
+            echo 'Deployment completed successfully!'
         }
         failure {
-            echo '❌ Deployment failed. Check logs.'
+            echo 'Deployment failed.'
         }
-    }
-}
-
     }
 }
