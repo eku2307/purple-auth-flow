@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Pull Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/<your-username>/<your-frontend-repo>.git'
+                git branch: 'main', url: 'https://github.com/eku2307/purple-auth-flow.git'
             }
         }
 
