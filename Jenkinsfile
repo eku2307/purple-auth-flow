@@ -10,8 +10,6 @@ pipeline {
     }
     // 
 
-[Image of a CI/CD Pipeline flow diagram]
-
 
     stages {
 
