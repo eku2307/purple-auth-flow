@@ -1,15 +1,17 @@
-// UPI Backend API Configuration
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  'https://d1sj9f5n6y3ndx.cloudfront.net';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE_URL) {
+  throw new Error('VITE_API_BASE_URL is not defined');
+}
 
-// API Client using HttpOnly cookie authentication
 class ApiClient {
   private getBaseOptions(): RequestInit {
+    const token = localStorage.getItem('jwt_token');
+
     return {
-      credentials: 'include', // 🔑 REQUIRED for cookies
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     };
   }
@@ -19,14 +21,7 @@ class ApiClient {
       ...this.getBaseOptions(),
       method: 'GET',
     });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw await this.extractError(response);
     return response.json();
   }
 
@@ -36,14 +31,7 @@ class ApiClient {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw await this.extractError(response);
     return response.json();
   }
 
@@ -53,14 +41,7 @@ class ApiClient {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw await this.extractError(response);
     return response.json();
   }
 
@@ -69,15 +50,13 @@ class ApiClient {
       ...this.getBaseOptions(),
       method: 'DELETE',
     });
-
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
-    }
-
+    if (!response.ok) throw await this.extractError(response);
     return response.json();
+  }
+
+  private async extractError(res: Response) {
+    const err = await res.json().catch(() => ({}));
+    return new Error(err.message || `HTTP ${res.status}`);
   }
 }
 
