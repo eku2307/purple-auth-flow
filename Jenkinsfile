@@ -2,14 +2,11 @@ pipeline {
     agent any
 
     environment {
-        // Use consistent environment variables
         DEPLOY_DIR = '/var/www/html'
         BUILD_DIR = 'dist'
-        // Specify the service name explicitly if deploying to a known server
-        WEB_SERVICE = 'nginx' 
+        WEB_SERVICE = 'nginx'
+        NODE_VERSION = '20' // Change to your preferred Node LTS
     }
-    // 
-
 
     stages {
 
@@ -19,16 +16,20 @@ pipeline {
                     echo "Updating system packages..."
                     sudo apt-get update -y
 
-                    echo "Installing Node, npm & build tools if missing..."
-                    # Ensure Node.js and npm are installed
-                    which node || sudo apt-get install -y nodejs npm
+                    echo "Installing Node.js ${NODE_VERSION} if missing..."
+                    if ! command -v node > /dev/null; then
+                        curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
+                        sudo apt-get install -y nodejs
+                    fi
+
+                    echo "Installing npm if missing..."
+                    which npm || sudo apt-get install -y npm
                 '''
             }
         }
 
         stage('Pull Code') {
             steps {
-                // Use built-in 'checkout' step for better integration
                 checkout([
                     $class: 'GitSCM', 
                     branches: [[name: 'main']], 
@@ -39,7 +40,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci' // 'npm ci' is preferred and handles the fallback internally
+                sh 'npm ci'
             }
         }
 
@@ -51,15 +52,19 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                // Use environment variables and target only the required web service
                 sh """
                     echo "Cleaning existing deployment at ${DEPLOY_DIR}..."
                     sudo rm -rf ${DEPLOY_DIR}/*
 
-                    echo "Copying new build files from ${BUILD_DIR}..."
+                    echo "Copying build files from ${BUILD_DIR} to ${DEPLOY_DIR}..."
                     sudo cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/
 
-                    echo "Restarting web service: ${WEB_SERVICE}..."
+                    echo "Fixing ownership and permissions..."
+                    sudo chown -R www-data:www-data ${DEPLOY_DIR}
+                    sudo find ${DEPLOY_DIR} -type d -exec chmod 755 {} \\;
+                    sudo find ${DEPLOY_DIR} -type f -exec chmod 644 {} \\;
+
+                    echo "Restarting ${WEB_SERVICE}..."
                     sudo systemctl restart ${WEB_SERVICE}
                 """
             }
@@ -68,14 +73,14 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo 'Frontend deployment completed successfully!'
         }
         failure {
             echo 'Deployment failed. Check build logs for details.'
         }
         always {
-            // Optional: Clean up workspace to save space
             cleanWs()
         }
     }
 }
+
