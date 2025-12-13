@@ -5,7 +5,8 @@ pipeline {
         DEPLOY_DIR = '/var/www/html'
         BUILD_DIR = 'dist'
         WEB_SERVICE = 'nginx'
-        NODE_VERSION = '20' // Change to your preferred Node LTS
+        NODE_VERSION = '20'
+        VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
     }
 
     stages {
@@ -31,8 +32,8 @@ pipeline {
         stage('Pull Code') {
             steps {
                 checkout([
-                    $class: 'GitSCM', 
-                    branches: [[name: 'main']], 
+                    $class: 'GitSCM',
+                    branches: [[name: 'main']],
                     userRemoteConfigs: [[url: 'https://github.com/eku2307/purple-auth-flow.git']]
                 ])
             }
@@ -83,4 +84,3 @@ pipeline {
         }
     }
 }
-
