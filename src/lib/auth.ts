@@ -37,46 +37,57 @@ export interface Wallet {
 }
 
 export const authService = {
+  /** EMAIL / PASSWORD LOGIN */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    const response = await apiClient.post<AuthResponse>(
+      '/api/auth/login',
+      credentials
+    );
+
     localStorage.setItem('jwt_token', response.token);
     localStorage.setItem('user_info', JSON.stringify(response));
+
     return response;
   },
 
-  async register(userData: RegisterRequest): Promise<any> {
-    return apiClient.post('/auth/register', {
+  /** REGISTER */
+  async register(userData: RegisterRequest): Promise<void> {
+    await apiClient.post('/api/auth/register', {
       name: userData.name,
       email: userData.email,
       password: userData.password,
-      upiId: userData.upiId
+      upiId: userData.upiId,
     });
   },
 
-  /** GOOGLE LOGIN (SPRING BOOT) */
-  async initiateGoogleLogin(): Promise<void> {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+  /** GOOGLE OAUTH INIT */
+  initiateGoogleLogin(): void {
+    window.location.href =
+      `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
   },
 
-  /** Store token from OAuthSuccess */
- handleOAuthCallback(token: string): void {
-  localStorage.setItem('jwt_token', token);
-}
+  /** HANDLE OAUTH REDIRECT */
+  handleOAuthCallback(token: string): void {
+    localStorage.setItem('jwt_token', token);
+  },
 
+  /** CURRENT USER PROFILE */
   async getProfile(): Promise<UserProfile> {
-    return apiClient.get<UserProfile>('/users/me');
+    return apiClient.get<UserProfile>('/api/users/me');
   },
 
+  /** WALLET */
   async getWallet(): Promise<Wallet> {
-    return apiClient.get<Wallet>('/users/wallet');
+    return apiClient.get<Wallet>('/api/users/wallet');
   },
 
-  logout() {
+  /** LOGOUT */
+  logout(): void {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_info');
   },
 
+  /** AUTH STATE */
   isAuthenticated(): boolean {
     return !!localStorage.getItem('jwt_token');
   },
@@ -84,5 +95,5 @@ export const authService = {
   getCurrentUser(): AuthResponse | null {
     const userInfo = localStorage.getItem('user_info');
     return userInfo ? JSON.parse(userInfo) : null;
-  }
+  },
 };
