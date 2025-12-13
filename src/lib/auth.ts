@@ -60,10 +60,9 @@ export const authService = {
   },
 
   /** Store token from OAuthSuccess */
-  handleOAuthCallback(token: string, userInfo: AuthResponse): void {
-    localStorage.setItem('jwt_token', token);
-    localStorage.setItem('user_info', JSON.stringify(userInfo));
-  },
+ handleOAuthCallback(token: string): void {
+  localStorage.setItem('jwt_token', token);
+}
 
   async getProfile(): Promise<UserProfile> {
     return apiClient.get<UserProfile>('/users/me');
