@@ -1,24 +1,29 @@
 // UPI Backend API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://16.112.4.208:8080/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://d1sj9f5n6y3ndx.cloudfront.net';
 
-// API Client with JWT authentication
+// API Client using HttpOnly cookie authentication
 class ApiClient {
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('jwt_token');
+  private getBaseOptions(): RequestInit {
     return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      credentials: 'include', // 🔑 REQUIRED for cookies
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
   }
 
   async get<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...this.getBaseOptions(),
       method: 'GET',
-      headers: this.getAuthHeaders(),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
+      const error = await response
+        .json()
+        .catch(() => ({ message: 'Request failed' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
@@ -27,13 +32,15 @@ class ApiClient {
 
   async post<T>(endpoint: string, data?: any): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...this.getBaseOptions(),
       method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : undefined,
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
+      const error = await response
+        .json()
+        .catch(() => ({ message: 'Request failed' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
@@ -42,13 +49,31 @@ class ApiClient {
 
   async put<T>(endpoint: string, data?: any): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...this.getBaseOptions(),
       method: 'PUT',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : undefined,
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
+      const error = await response
+        .json()
+        .catch(() => ({ message: 'Request failed' }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...this.getBaseOptions(),
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: 'Request failed' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
