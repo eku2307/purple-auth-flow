@@ -18,6 +18,7 @@ pipeline {
                     which node || sudo apt-get install -y nodejs npm
                 '''
             }
+            
         }
 
         stage('Pull Code') {
@@ -58,6 +59,15 @@ pipeline {
                 '''
             }
         }
+        stage('Deploy to Nginx') {
+             steps {
+                 sh '''
+                     sudo rm -rf /var/www/html/*
+                     sudo cp -r dist/* /var/www/html/
+        '''
+    }
+}
+
     }
 
     post {
