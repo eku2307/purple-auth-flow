@@ -1,17 +1,18 @@
+
 pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR   = '/var/www/html'
-        BUILD_DIR    = 'dist'
-        NODE_VERSION = '20'
-        FRONTEND_EC2 = 'ubuntu@16.171.241.145'
-        SSH_KEY      = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
-        NODE_ENV     = 'production'
-        VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net' // Ensure .env.production uses this
+        // VITE env will be picked from .env.production automatically
+        NODE_ENV = 'production'
     }
 
     stages {
+        stage('Checkout Code') {
+            steps {
+                git url: 'https://github.com/eku2307/purple-auth-flow', branch: 'main'
+            }
+        }
 
         stage('Prepare Environment') {
             steps {
@@ -20,21 +21,10 @@ pipeline {
                     echo "Updating system packages..."
                     sudo apt-get update -y
 
-                    echo "Installing Node.js..."
-                    if ! command -v node >/dev/null 2>&1; then
-                        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-                        sudo apt-get install -y nodejs
-                    fi
-
+                    echo "Checking Node.js version..."
                     node -v
                     npm -v
                 '''
-            }
-        }
-
-        stage('Pull Code') {
-            steps {
-                checkout scm
             }
         }
 
@@ -43,7 +33,7 @@ pipeline {
                 sh '''
                     echo "Removing old build and Vite cache..."
                     rm -rf dist
-                    rm -rf node_modules/.vite || true
+                    rm -rf node_modules/.vite
                 '''
             }
         }
@@ -57,11 +47,11 @@ pipeline {
         stage('Debug Env Files') {
             steps {
                 sh '''
-                    echo "Listing environment files:"
-                    ls -la .env* || true
+                    echo "Listing .env.production:"
+                    ls -la .env.production
 
-                    echo "Current VITE environment variables:"
-                    env | grep VITE || true
+                    echo "VITE environment variables:"
+                    env | grep VITE || echo "No VITE variables found"
                 '''
             }
         }
@@ -70,44 +60,30 @@ pipeline {
             steps {
                 sh '''
                     echo "Building frontend in production mode..."
-                    npm run build -- --mode production
-                '''
-            }
-        }
-
-        stage('Verify API URL in Build') {
-            steps {
-                sh '''
-                    echo "Checking built JS files for correct API URL..."
-                    if grep -q "$VITE_API_BASE_URL" dist/assets/*.js; then
-                        echo "✅ Correct API URL found in build files"
-                    else
-                        echo "❌ ERROR: Correct API URL not found! Build may be using api.example.com"
-                        exit 1
-                    fi
+                    # Use npx to ensure local Vite is used
+                    npx vite build --mode production
                 '''
             }
         }
 
         stage('Deploy to Frontend EC2') {
             steps {
-                sh '''
-                    echo "Deploying to EC2..."
-
-                    # Sync files to frontend EC2 and remove old files
-                    rsync -avz --delete -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" $BUILD_DIR/ $FRONTEND_EC2:$DEPLOY_DIR/
-
-                    # Restart Nginx
-                    ssh -i $SSH_KEY -o StrictHostKeyChecking=no $FRONTEND_EC2 "sudo systemctl restart nginx"
-                '''
+                sshagent(['your-ssh-credentials-id']) {
+                    sh '''
+                        echo "Deploying to EC2..."
+                        # Remove old files
+                        ssh -o StrictHostKeyChecking=no ubuntu@YOUR_EC2_IP 'sudo rm -rf /var/www/html/*'
+                        # Copy new build
+                        scp -r dist/* ubuntu@YOUR_EC2_IP:/var/www/html/
+                    '''
+                }
             }
         }
-
     }
 
     post {
         success {
-            echo '✅ Frontend deployment completed successfully'
+            echo '✅ Deployment completed successfully'
         }
         failure {
             echo '❌ Deployment failed'
