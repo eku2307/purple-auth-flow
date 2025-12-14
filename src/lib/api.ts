@@ -1,7 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-if (!API_BASE_URL) {
-  throw new Error('VITE_API_BASE_URL is not defined');
-}
+// Default to localhost for development if env var not set
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 class ApiClient {
   private getBaseOptions(): RequestInit {
