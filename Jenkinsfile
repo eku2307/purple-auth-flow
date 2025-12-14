@@ -75,26 +75,21 @@ pipeline {
             }
         }
 
-        stage('Deploy to Server') {
-            steps {
-                sh """
-                    echo "Cleaning existing deployment at ${DEPLOY_DIR}..."
-                    sudo rm -rf ${DEPLOY_DIR}/*
+        stage('Deploy to Frontend EC2') {
+    steps {
+        sh """
+            echo "Deploying build to Frontend EC2 (16.171.241.145)..."
 
-                    echo "Copying build files from ${BUILD_DIR} to ${DEPLOY_DIR}..."
-                    sudo cp -r ${BUILD_DIR}/* ${DEPLOY_DIR}/
+            rsync -avz --delete \
+                ${BUILD_DIR}/ \
+                ubuntu@16.171.241.145:${DEPLOY_DIR}/
 
-                    echo "Fixing ownership and permissions..."
-                    sudo chown -R www-data:www-data ${DEPLOY_DIR}
-                    sudo find ${DEPLOY_DIR} -type d -exec chmod 755 {} \\;
-                    sudo find ${DEPLOY_DIR} -type f -exec chmod 644 {} \\;
-
-                    echo "Restarting ${WEB_SERVICE}..."
-                    sudo systemctl restart ${WEB_SERVICE}
-                """
-            }
-        }
+            echo "Restarting nginx on frontend EC2..."
+            ssh ubuntu@16.171.241.145 'sudo systemctl restart ${WEB_SERVICE}'
+        """
     }
+}
+
 
     post {
         success {
