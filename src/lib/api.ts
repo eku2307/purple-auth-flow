@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net';
+// Default to localhost for development if env var not set
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 class ApiClient {
   private getBaseOptions(): RequestInit {
