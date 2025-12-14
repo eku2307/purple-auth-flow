@@ -2,14 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR       = '/var/www/html'
-        BUILD_DIR        = 'dist'
-        WEB_SERVICE      = 'nginx'
-        NODE_VERSION     = '20'
+        DEPLOY_DIR   = '/var/www/html'
+        BUILD_DIR    = 'dist'
+        WEB_SERVICE  = 'nginx'
+        NODE_VERSION = '20'
         VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
-        SSH_KEY_PATH     = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
-        FRONTEND_EC2_IP  = '16.171.241.145'
-        SSH_USER         = 'ubuntu'
+        SSH_KEY      = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
+        FRONTEND_EC2 = 'ubuntu@16.171.241.145'
     }
 
     stages {
@@ -19,11 +18,11 @@ pipeline {
                 sh '''
                     set -e
                     echo "Updating system packages..."
-                    sudo apt-get update -y
+                    sudo apt-get update -y || true
 
                     echo "Installing Node.js if missing..."
                     if ! command -v node >/dev/null 2>&1; then
-                        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                        curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash -
                         sudo apt-get install -y nodejs
                     fi
 
@@ -42,7 +41,7 @@ pipeline {
         stage('Clean Old Build & Cache') {
             steps {
                 sh '''
-                    rm -rf dist
+                    rm -rf ${BUILD_DIR}
                     rm -rf node_modules/.vite || true
                 '''
             }
@@ -75,17 +74,20 @@ pipeline {
         stage('Deploy to Frontend EC2') {
             steps {
                 sh '''
-                    set -ex
-                    echo "Deploying to frontend EC2..."
+                    echo "Deploying to frontend EC2 with sudo permissions..."
 
-                    # Test SSH connection first
-                    ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@$FRONTEND_EC2_IP "echo Connection successful"
+                    # Test SSH connection
+                    ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${FRONTEND_EC2} "echo Connection successful"
 
-                    # Deploy files using rsync
-                    rsync -avz -e "ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no" --delete $BUILD_DIR/ $SSH_USER@$FRONTEND_EC2_IP:$DEPLOY_DIR/
+                    # Rsync using sudo on remote
+                    rsync -avz \
+                        -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no" \
+                        --rsync-path="sudo rsync" \
+                        --delete \
+                        ${BUILD_DIR}/ ${FRONTEND_EC2}:${DEPLOY_DIR}/
 
-                    # Restart web server
-                    ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@$FRONTEND_EC2_IP "sudo systemctl restart $WEB_SERVICE"
+                    # Restart nginx
+                    ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${FRONTEND_EC2} "sudo systemctl restart nginx"
                 '''
             }
         }
@@ -93,10 +95,10 @@ pipeline {
 
     post {
         success {
-            echo 'Frontend deployment completed successfully!'
+            echo 'Frontend deployment completed successfully'
         }
         failure {
-            echo 'Deployment failed. Check the logs above for errors.'
+            echo 'Deployment failed'
         }
         always {
             cleanWs()
