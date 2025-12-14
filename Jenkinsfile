@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR = '/var/www/html'
-        BUILD_DIR  = 'dist'
-        WEB_SERVICE = 'nginx'
+        DEPLOY_DIR   = '/var/www/html'
+        BUILD_DIR    = 'dist'
+        WEB_SERVICE  = 'nginx'
         NODE_VERSION = '20'
         VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
     }
@@ -71,13 +71,13 @@ pipeline {
 
         stage('Deploy to Frontend EC2') {
             steps {
-                sh '''
-                    echo "Deploying to frontend EC2..."
-
-                    rsync -avz --delete dist/ ubuntu@16.171.241.145:/var/www/html/
-
-                    ssh ubuntu@16.171.241.145 "sudo systemctl restart nginx"
-                '''
+                sshagent(['frontend-ec2-key']) { // ID of your Jenkins SSH credential
+                    sh """
+                        echo "Deploying to frontend EC2..."
+                        rsync -avz --delete ${BUILD_DIR}/ ubuntu@16.171.241.145:${DEPLOY_DIR}/
+                        ssh ubuntu@16.171.241.145 "sudo systemctl restart ${WEB_SERVICE}"
+                    """
+                }
             }
         }
     }
@@ -94,3 +94,4 @@ pipeline {
         }
     }
 }
+
