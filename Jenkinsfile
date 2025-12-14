@@ -70,17 +70,17 @@ pipeline {
         }
 
         stage('Deploy to Frontend EC2') {
-            steps {
-                sshagent(['frontend-ec2-key']) { // ID of your Jenkins SSH credential
-                    sh """
-                        echo "Deploying to frontend EC2..."
-                        rsync -avz --delete ${BUILD_DIR}/ ubuntu@16.171.241.145:${DEPLOY_DIR}/
-                        ssh ubuntu@16.171.241.145 "sudo systemctl restart ${WEB_SERVICE}"
-                    """
-                }
-            }
-        }
+    steps {
+        sh '''
+            echo "Deploying to frontend EC2..."
+            
+            rsync -avz -e "ssh -i /var/lib/jenkins/.ssh/novapay_key_pair.pem -o StrictHostKeyChecking=no" --delete dist/ ubuntu@16.171.241.145:/var/www/html/
+            
+            ssh -i /var/lib/jenkins/.ssh/novapay_key_pair.pem -o StrictHostKeyChecking=no ubuntu@16.171.241.145 "sudo systemctl restart nginx"
+        '''
     }
+}
+
 
     post {
         success {
