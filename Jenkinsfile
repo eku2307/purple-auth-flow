@@ -8,6 +8,7 @@ pipeline {
         VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
         FRONTEND_EC2 = 'ubuntu@16.171.241.145'
         SSH_KEY      = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
+        NODE_ENV     = 'production' // Force production environment
     }
 
     stages {
@@ -40,6 +41,7 @@ pipeline {
         stage('Clean Old Build & Cache') {
             steps {
                 sh '''
+                    echo "Cleaning old build and cache..."
                     rm -rf dist
                     rm -rf node_modules/.vite || true
                 '''
@@ -64,9 +66,21 @@ pipeline {
             }
         }
 
-        stage('Build Project') {
+        stage('Build Project for Production') {
             steps {
-                sh 'npm run build'
+                sh '''
+                    echo "Building frontend with production mode..."
+                    npm run build -- --mode production
+                '''
+            }
+        }
+
+        stage('Verify Build') {
+            steps {
+                sh '''
+                    echo "Checking if API URL is correct in build files..."
+                    grep "$VITE_API_BASE_URL" dist/assets/*.js || echo "Warning: URL not found in build!"
+                '''
             }
         }
 
@@ -76,7 +90,7 @@ pipeline {
                     echo "Deploying to frontend EC2..."
 
                     # Sync files to frontend EC2
-                    rsync -avz -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" --delete $BUILD_DIR/ $FRONTEND_EC2:$DEPLOY_DIR/
+                    rsync -avz --delete -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" $BUILD_DIR/ $FRONTEND_EC2:$DEPLOY_DIR/
 
                     # Restart Nginx on frontend
                     ssh -i $SSH_KEY -o StrictHostKeyChecking=no $FRONTEND_EC2 "sudo systemctl restart nginx"
@@ -98,4 +112,5 @@ pipeline {
         }
     }
 }
+
 
