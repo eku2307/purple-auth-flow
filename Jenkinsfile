@@ -5,10 +5,10 @@ pipeline {
         DEPLOY_DIR   = '/var/www/html'
         BUILD_DIR    = 'dist'
         NODE_VERSION = '20'
-        VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
         FRONTEND_EC2 = 'ubuntu@16.171.241.145'
         SSH_KEY      = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
-        NODE_ENV     = 'production' // Force production environment
+        NODE_ENV     = 'production'
+        VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net' // Ensure .env.production uses this
     }
 
     stages {
@@ -41,7 +41,7 @@ pipeline {
         stage('Clean Old Build & Cache') {
             steps {
                 sh '''
-                    echo "Cleaning old build and cache..."
+                    echo "Removing old build and Vite cache..."
                     rm -rf dist
                     rm -rf node_modules/.vite || true
                 '''
@@ -54,32 +54,37 @@ pipeline {
             }
         }
 
-        stage('Debug Vite Env') {
+        stage('Debug Env Files') {
             steps {
                 sh '''
-                    echo "==== ENV FILES ===="
+                    echo "Listing environment files:"
                     ls -la .env* || true
 
-                    echo "==== VITE VARS ===="
+                    echo "Current VITE environment variables:"
                     env | grep VITE || true
                 '''
             }
         }
 
-        stage('Build Project for Production') {
+        stage('Build Frontend for Production') {
             steps {
                 sh '''
-                    echo "Building frontend with production mode..."
+                    echo "Building frontend in production mode..."
                     npm run build -- --mode production
                 '''
             }
         }
 
-        stage('Verify Build') {
+        stage('Verify API URL in Build') {
             steps {
                 sh '''
-                    echo "Checking if API URL is correct in build files..."
-                    grep "$VITE_API_BASE_URL" dist/assets/*.js || echo "Warning: URL not found in build!"
+                    echo "Checking built JS files for correct API URL..."
+                    if grep -q "$VITE_API_BASE_URL" dist/assets/*.js; then
+                        echo "✅ Correct API URL found in build files"
+                    else
+                        echo "❌ ERROR: Correct API URL not found! Build may be using api.example.com"
+                        exit 1
+                    fi
                 '''
             }
         }
@@ -87,12 +92,12 @@ pipeline {
         stage('Deploy to Frontend EC2') {
             steps {
                 sh '''
-                    echo "Deploying to frontend EC2..."
+                    echo "Deploying to EC2..."
 
-                    # Sync files to frontend EC2
+                    # Sync files to frontend EC2 and remove old files
                     rsync -avz --delete -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=no" $BUILD_DIR/ $FRONTEND_EC2:$DEPLOY_DIR/
 
-                    # Restart Nginx on frontend
+                    # Restart Nginx
                     ssh -i $SSH_KEY -o StrictHostKeyChecking=no $FRONTEND_EC2 "sudo systemctl restart nginx"
                 '''
             }
@@ -102,15 +107,13 @@ pipeline {
 
     post {
         success {
-            echo 'Frontend deployment completed successfully'
+            echo '✅ Frontend deployment completed successfully'
         }
         failure {
-            echo 'Deployment failed'
+            echo '❌ Deployment failed'
         }
         always {
             cleanWs()
         }
     }
 }
-
-
