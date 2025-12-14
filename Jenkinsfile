@@ -77,16 +77,16 @@ pipeline {
 
         stage('Deploy to Frontend EC2') {
     steps {
-        sh """
+        sh '''
             echo "Deploying build to Frontend EC2 (16.171.241.145)..."
 
             rsync -avz --delete \
-                ${BUILD_DIR}/ \
-                ubuntu@16.171.241.145:${DEPLOY_DIR}/
+                dist/ \
+                ubuntu@16.171.241.145:/var/www/html/
 
             echo "Restarting nginx on frontend EC2..."
-            ssh ubuntu@16.171.241.145 'sudo systemctl restart ${WEB_SERVICE}'
-        """
+            ssh ubuntu@16.171.241.145 "sudo systemctl restart nginx"
+        '''
     }
 }
 
