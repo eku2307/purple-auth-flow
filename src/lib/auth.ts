@@ -67,8 +67,11 @@ export const authService = {
   },
 
   /** HANDLE OAUTH REDIRECT */
-  handleOAuthCallback(token: string): void {
+  handleOAuthCallback(token: string, userInfo?: AuthResponse): void {
     localStorage.setItem('jwt_token', token);
+    if (userInfo) {
+      localStorage.setItem('user_info', JSON.stringify(userInfo));
+    }
   },
 
   /** CURRENT USER PROFILE */
