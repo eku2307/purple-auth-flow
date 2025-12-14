@@ -33,7 +33,7 @@ const App = () => (
 
               <Route path="*" element={<NotFound />} />
 
-              <Route path="/pay" element={<PaymentPage />} />
+          
 
               <Route path="*" element={<NotFound />} />
             </Routes>
