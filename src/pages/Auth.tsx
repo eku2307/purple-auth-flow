@@ -149,7 +149,7 @@ const Auth = () => {
             variant="outline"
             className="w-full"
             onClick={() => {
-              window.location.href = "http://localhost:8080/oauth2/authorization/google";
+              window.location.href = "https://d1sj9f5n6y3ndx.cloudfront.net/oauth2/authorization/google";
             }}
           >
             Sign in with Google
