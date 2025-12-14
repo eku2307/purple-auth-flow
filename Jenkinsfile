@@ -2,11 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DEPLOY_DIR         = '/var/www/html'
-        BUILD_DIR          = 'dist'
-        WEB_SERVICE        = 'nginx'
-        NODE_VERSION       = '20'
-        VITE_API_BASE_URL  = 'https://d1sj9f5n6y3ndx.cloudfront.net'
+        DEPLOY_DIR       = '/var/www/html'
+        BUILD_DIR        = 'dist'
+        WEB_SERVICE      = 'nginx'
+        NODE_VERSION     = '20'
+        VITE_API_BASE_URL = 'https://d1sj9f5n6y3ndx.cloudfront.net'
+        SSH_KEY_PATH     = '/var/lib/jenkins/.ssh/novapay_key_pair.pem'
+        FRONTEND_EC2_IP  = '16.171.241.145'
+        SSH_USER         = 'ubuntu'
     }
 
     stages {
@@ -18,7 +21,7 @@ pipeline {
                     echo "Updating system packages..."
                     sudo apt-get update -y
 
-                    echo "Installing Node.js..."
+                    echo "Installing Node.js if missing..."
                     if ! command -v node >/dev/null 2>&1; then
                         curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
                         sudo apt-get install -y nodejs
@@ -72,11 +75,17 @@ pipeline {
         stage('Deploy to Frontend EC2') {
             steps {
                 sh '''
+                    set -ex
                     echo "Deploying to frontend EC2..."
-                    
-                    rsync -avz -e "ssh -i /var/lib/jenkins/.ssh/novapay_key_pair.pem -o StrictHostKeyChecking=no" --delete dist/ ubuntu@16.171.241.145:/var/www/html/
-                    
-                    ssh -i /var/lib/jenkins/.ssh/novapay_key_pair.pem -o StrictHostKeyChecking=no ubuntu@16.171.241.145 "sudo systemctl restart nginx"
+
+                    # Test SSH connection first
+                    ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@$FRONTEND_EC2_IP "echo Connection successful"
+
+                    # Deploy files using rsync
+                    rsync -avz -e "ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no" --delete $BUILD_DIR/ $SSH_USER@$FRONTEND_EC2_IP:$DEPLOY_DIR/
+
+                    # Restart web server
+                    ssh -i $SSH_KEY_PATH -o StrictHostKeyChecking=no $SSH_USER@$FRONTEND_EC2_IP "sudo systemctl restart $WEB_SERVICE"
                 '''
             }
         }
@@ -84,10 +93,10 @@ pipeline {
 
     post {
         success {
-            echo 'Frontend deployment completed successfully'
+            echo 'Frontend deployment completed successfully!'
         }
         failure {
-            echo 'Deployment failed'
+            echo 'Deployment failed. Check the logs above for errors.'
         }
         always {
             cleanWs()
