@@ -23,7 +23,6 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -72,8 +71,7 @@ const Dashboard = () => {
                   Process and manage all your payment transactions
                 </p>
                 <Button variant="outline" className="w-full">
-                </Button>
-                View Payments
+                  View Payments
                 </Button>
               </Card>
 
