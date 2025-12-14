@@ -39,6 +39,19 @@ pipeline {
             }
         }
 
+        stage('Clean Old Build & Cache') {
+    steps {
+        sh '''
+            echo "Removing old build artifacts..."
+            rm -rf dist
+
+            echo "Removing Vite cache..."
+            rm -rf node_modules/.vite
+        '''
+    }
+}
+
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm ci'
