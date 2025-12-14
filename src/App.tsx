@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import OAuthCallback from "./pages/OAuthCallback";
 import OAuthSuccessPage from "./pages/OAuthSuccessPage";
 import NotFound from "./pages/NotFound";
+import PaymentPage from "./pages/PaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,10 @@ const App = () => (
 
               {/* Google OAuth success redirect from Spring Boot */}
               <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+
+              <Route path="*" element={<NotFound />} />
+
+              <Route path="/pay" element={<PaymentPage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

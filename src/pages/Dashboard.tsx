@@ -23,6 +23,7 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -70,9 +71,12 @@ const Dashboard = () => {
                 <p className="text-muted-foreground">
                   Process and manage all your payment transactions
                 </p>
-                <Button variant="outline" className="w-full">
-                  View Payments
+                <Button variant="outline"
+                className="w-full"
+                onClick={() => navigate("/pay")}>
+                View Payments
                 </Button>
+
               </Card>
 
               <Card className="p-6 space-y-4 hover:shadow-lg transition-shadow border-2">
