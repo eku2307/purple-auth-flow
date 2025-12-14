@@ -57,6 +57,17 @@ pipeline {
                 sh 'npm ci'
             }
         }
+        stage('Debug Vite Env') {
+    steps {
+        sh '''
+            echo "---- ENV FILES ----"
+            ls -la .env* || true
+
+            echo "---- VITE VARIABLES ----"
+            printenv | grep VITE || true
+        '''
+    }
+}
 
         stage('Build Project') {
             steps {
