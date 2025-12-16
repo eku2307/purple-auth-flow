@@ -82,7 +82,7 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold text-foreground">
-                Welcome back, {displayName}!
+                Welcome back to Novapay!
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your Smart Payment Management Hub

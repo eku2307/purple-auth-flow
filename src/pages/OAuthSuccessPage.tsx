@@ -33,7 +33,7 @@ sessionStorage.setItem(
   "welcomeMessage",
   isNewUser
     ? "Welcome! Your account has been created 🎉"
-    : "Welcome back 👋"
+    : "Welcome back again!"
 );
 
 navigate("/dashboard", { replace: true });
