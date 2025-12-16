@@ -1,15 +1,34 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Sparkles, LogOut, CreditCard, Receipt, TrendingUp } from "lucide-react";
+import {
+  Sparkles,
+  LogOut,
+  CreditCard,
+  Receipt,
+  TrendingUp,
+} from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // 🔔 One-time welcome message (new user vs existing user)
+  useEffect(() => {
+    const message = sessionStorage.getItem("welcomeMessage");
+
+    if (message) {
+      toast({
+        title: message,
+      });
+      sessionStorage.removeItem("welcomeMessage");
+    }
+  }, [toast]);
 
   const handleSignOut = () => {
     logout();
@@ -23,6 +42,9 @@ const Dashboard = () => {
     navigate("/auth");
   };
 
+  const displayName =
+    user?.username || user?.email?.split("@")[0] || "there";
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -30,12 +52,18 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            <span className="text-xl font-bold text-foreground">NovaPay</span>
+            <span className="text-xl font-bold text-foreground">
+              NovaPay
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
             {isAuthenticated ? (
-              <Button onClick={handleSignOut} variant="outline" className="gap-2">
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="gap-2"
+              >
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </Button>
@@ -54,7 +82,7 @@ const Dashboard = () => {
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold text-foreground">
-                Welcome back, {user?.username || user?.email?.split("@")[0]}!
+                Welcome back, {displayName}!
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your Smart Payment Management Hub
@@ -66,7 +94,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <CreditCard className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Payments</h3>
+                <h3 className="text-xl font-semibold text-foreground">
+                  Payments
+                </h3>
                 <p className="text-muted-foreground">
                   Process and manage all your payment transactions
                 </p>
@@ -79,7 +109,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Receipt className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Invoices</h3>
+                <h3 className="text-xl font-semibold text-foreground">
+                  Invoices
+                </h3>
                 <p className="text-muted-foreground">
                   Create and track invoices for your clients
                 </p>
@@ -92,7 +124,9 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">Analytics</h3>
+                <h3 className="text-xl font-semibold text-foreground">
+                  Analytics
+                </h3>
                 <p className="text-muted-foreground">
                   Monitor financial trends and insights
                 </p>
@@ -114,12 +148,18 @@ const Dashboard = () => {
                 Your Smart Payment Management Hub
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Track transactions, manage accounts, and monitor financial insights — all in one secure and intuitive dashboard.
+                Track transactions, manage accounts, and monitor
+                financial insights — all in one secure and intuitive
+                dashboard.
               </p>
             </div>
 
             <div className="flex justify-center gap-4 mt-8">
-              <Button onClick={handleSignIn} size="lg" className="text-lg px-8">
+              <Button
+                onClick={handleSignIn}
+                size="lg"
+                className="text-lg px-8"
+              >
                 Get Started
               </Button>
             </div>
@@ -129,9 +169,12 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <CreditCard className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Real-Time Transactions</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Real-Time Transactions
+                </h3>
                 <p className="text-muted-foreground">
-                  View and track every incoming and outgoing payment instantly with clear, structured logs.
+                  View and track every incoming and outgoing payment
+                  instantly with clear, structured logs.
                 </p>
               </div>
 
@@ -139,9 +182,12 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <Receipt className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Smart Billing & Invoices</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Smart Billing & Invoices
+                </h3>
                 <p className="text-muted-foreground">
-                  Generate, manage, and automate invoices with seamless scheduling and reminders.
+                  Generate, manage, and automate invoices with
+                  seamless scheduling and reminders.
                 </p>
               </div>
 
@@ -149,9 +195,12 @@ const Dashboard = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto">
                   <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Analytics & Insights</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Analytics & Insights
+                </h3>
                 <p className="text-muted-foreground">
-                  Visualize financial health with charts, summaries, and AI-powered spending analysis.
+                  Visualize financial health with charts, summaries,
+                  and AI-powered spending analysis.
                 </p>
               </div>
             </div>

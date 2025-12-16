@@ -5,15 +5,19 @@ interface AuthContextType {
   user: AuthResponse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isNewUser: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, upiId: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthResponse | null>(null);
+  const [isNewUser, setIsNewUser] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -23,14 +27,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await authService.login({ email, password });
-    setUser(response);
-  };
+  const response = await authService.login({ email, password });
+  setUser(response);
+  setIsNewUser(false);
+};
+
 
   const register = async (name: string, email: string, upiId: string, password: string) => {
-    await authService.register({ name, email, upiId, password });
-    await login(email, password);
-  };
+  await authService.register({ name, email, upiId, password });
+  const response = await authService.login({ email, password });
+  setUser(response);
+  setIsNewUser(true);
+};
+
 
   const logout = () => {
     authService.logout();
@@ -39,15 +48,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+  value={{
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    isNewUser,
+    login,
+    register,
+    logout,
+  }}
+>
+
+    
       {children}
     </AuthContext.Provider>
   );

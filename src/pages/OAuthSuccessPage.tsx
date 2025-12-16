@@ -1,8 +1,11 @@
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function OAuthSuccessPage() {
     const navigate = useNavigate();
+    const { isNewUser } = useAuth();
+
 
     useEffect(() => {
         // Check standard ?token=XYZ
@@ -25,7 +28,16 @@ export default function OAuthSuccessPage() {
 
         // Save token and go to dashboard
         localStorage.setItem("token", token);
-        navigate("/dashboard", { replace: true });
+
+sessionStorage.setItem(
+  "welcomeMessage",
+  isNewUser
+    ? "Welcome! Your account has been created 🎉"
+    : "Welcome back 👋"
+);
+
+navigate("/dashboard", { replace: true });
+
     }, [navigate]);
 
     return (
